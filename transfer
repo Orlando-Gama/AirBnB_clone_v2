@@ -1,20 +1,31 @@
 #!/usr/bin/env bash
-# transfer a file from our client to a server
-#
-#variables
-path="$(cd "dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-filename=$(basename "$BASH_SOURCE")
-brown='\e[0;33m'
-reset='\033[0m'
-file="$1"
-ip="$2"
-user="ubuntu"
-key="/.ssh/id_rsa"
+# Transfers a file from Holberton's client to another.
+# Accepts four arguments:
+#    The path to the file to be transferred.
+#    The IP of the server to transfer the file to.
+#    The username that scp connects with.
+#    The path to the SSH private key that scp uses.
 
+file_path="$1"
+ip_address="$2"
+username="$3"
+key_path="$4"
 
-if [ $# -eq 2 ]; then
+if [ ! -f "$file_path" ]; then
+  echo "Error: File '$file_path' not found."
+  exit 1
+fi
 
-    scp -i "$key" -o StrictHostKeyChecking=no "$path"/"$file" "$user"@"$ip":/home/"$user"/
+if [ ! -f "$key_path" ]; then
+  echo "Error: SSH private key '$key_path' not found."
+  exit 1
+fi
+
+echo "Transferring file to $username@$ip_address..."
+scp -o StrictHostKeyChecking=no -i "$key_path" "$file_path" "$username@$ip_address":~
+
+if [ $? -eq 0 ]; then
+  echo "File transfer successful."
 else
-    echo -e "usage: ${brown}$filename PATH_TO_FILE IP USERNAME PATH_TO_SSH_KEY${reset}"
-fi;
+  echo "Error: File transfer failed."
+fi
